@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="icon" href="StoryPlay.jpeg" type="image/x-icon">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StoryPlay — Tu Universo de Lectura</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<script>
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+</script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);</script>
+<style>
+  :root {
+    --purple: #4B0082;
+    --purple-mid: #6A0DAD;
+    --purple-light: #9B30FF;
+    --blue: #1A6DFF;
+    --blue-glow: #4D9FFF;
+    --neon-green: #00FF88;
+    --orange: #FF7A30;
+    --bg: #08070F;
+    --bg2: #0E0C1A;
+    --bg3: #13111F;
+    --text: #F0EEF8;
+    --text-dim: #8A87A8;
+    --border: rgba(155, 48, 255, 0.18);
+    --card-bg: rgba(20, 17, 35, 0.85);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  h1, h2, h3, h4, .brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.35;
+  }
+
+  /* ── CUSTOM CURSOR ── */
+  .cursor {
+    width: 14px; height: 14px;
+    background: var(--neon-green);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    transition: transform 0.12s ease, background 0.2s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--purple-light);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.28s ease;
+    opacity: 0.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 5%;
+    background: rgba(8, 7, 15, 0.75);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    animation: fadeDown 0.7s ease both;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .brand {
+    font-size: 1.6rem;
+    letter-spacing: -0.03em;
+    background: linear-gradient(90deg, var(--purple-light), var(--blue-glow), var(--neon-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    background: linear-gradient(135deg, var(--purple-mid), var(--blue));
+    color: #fff !important;
+    padding: 0.55rem 1.4rem;
+    border-radius: 100px;
+    font-weight: 500 !important;
+    transition: box-shadow 0.25s, transform 0.2s !important;
+  }
+  .nav-cta:hover {
+    box-shadow: 0 0 22px rgba(74, 0, 130, 0.7);
+    transform: translateY(-2px) !important;
+    color: #fff !important;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 9rem 5% 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 0%, rgba(75,0,130,0.55) 0%, transparent 70%),
+      radial-gradient(ellipse 45% 40% at 20% 80%, rgba(26,109,255,0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 35% 30% at 85% 60%, rgba(0,255,136,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(155,48,255,0.15);
+    border: 1px solid rgba(155,48,255,0.4);
+    color: var(--purple-light);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.4rem 1.1rem;
+    border-radius: 100px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero h1 {
+    font-size: clamp(3.2rem, 7vw, 6.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    max-width: 900px;
+    animation: fadeUp 0.9s 0.35s ease both;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(90deg, var(--purple-light) 0%, var(--blue-glow) 50%, var(--neon-green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    color: var(--text-dim);
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    max-width: 580px;
+    margin: 1.8rem auto 0;
+    line-height: 1.7;
+    animation: fadeUp 0.9s 0.5s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2.8rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.65s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--purple-mid), var(--blue));
+    color: #fff;
+    padding: 0.9rem 2.4rem;
+    border-radius: 100px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: box-shadow 0.3s, transform 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 35px rgba(106,13,173,0.6), 0 8px 30px rgba(26,109,255,0.3);
+    transform: translateY(-3px);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    padding: 0.9rem 2.4rem;
+    border-radius: 100px;
+    font-size: 1rem;
+    font-weight: 400;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.25s, background 0.25s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-ghost:hover {
+    border-color: var(--purple-light);
+    background: rgba(155,48,255,0.07);
+  }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    flex-wrap: wrap;
+    padding: 3.5rem 5%;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--purple-light), var(--blue-glow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-label { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.2rem; }
+
+  /* ── SECTION COMMONS ── */
+  section { padding: 7rem 5%; }
+
+  .section-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--neon-green);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 1.2rem;
+  }
+
+  .section-sub {
+    color: var(--text-dim);
+    max-width: 540px;
+    line-height: 1.7;
+    font-size: 1rem;
+  }
+
+  /* ── FEATURES GRID ── */
+  #features { background: var(--bg2); }
+
+  .features-header { max-width: 600px; margin-bottom: 4rem; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .feature-card {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--purple-light), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover { background: rgba(30, 24, 55, 0.95); }
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-card p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.65; }
+
+  /* ── HOW IT WORKS ── */
+  #how { background: var(--bg); }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    margin-top: 4rem;
+  }
+
+  .how-step {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .how-step:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(75,0,130,0.3);
+  }
+
+  .step-num {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple-mid), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 0 auto 1.4rem;
+    box-shadow: 0 0 20px rgba(106,13,173,0.5);
+  }
+
+  .how-step h3 { font-size: 1.1rem; margin-bottom: 0.6rem; }
+  .how-step p { color: var(--text-dim); font-size: 0.88rem; line-height: 1.6; }
+
+  /* ── GAMIFICATION ── */
+  #gamification { background: var(--bg2); }
+
+  .gami-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+    margin-top: 3rem;
+  }
+
+  .gami-visual {
+    position: relative;
+    height: 420px;
+  }
+
+  .world-card {
+    position: absolute;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.2rem 1.6rem;
+    transition: transform 0.5s ease;
+  }
+  .world-card:nth-child(1) { top: 0;    left: 0;   width: 200px; }
+  .world-card:nth-child(2) { top: 30px; left: 180px; width: 220px; animation: float1 4s ease-in-out infinite; }
+  .world-card:nth-child(3) { top: 200px; left: 40px; width: 200px; animation: float2 5s ease-in-out infinite; }
+  .world-card:nth-child(4) { top: 220px; left: 220px; width: 180px; animation: float3 4.5s ease-in-out infinite; }
+
+  @keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  @keyframes float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  @keyframes float3 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+  .world-card .w-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+  .world-card .w-name { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; }
+  .world-card .w-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 100px;
+    margin-top: 0.6rem;
+    overflow: hidden;
+  }
+  .world-card .w-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--purple-light), var(--neon-green));
+  }
+
+  .xp-badge {
+    position: absolute;
+    right: 0; bottom: 60px;
+    background: linear-gradient(135deg, #1a1030, #0d1525);
+    border: 1px solid var(--blue);
+    border-radius: 14px;
+    padding: 1.2rem 1.8rem;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(26,109,255,0.25);
+    animation: float1 3.5s ease-in-out infinite;
+  }
+  .xp-badge .xp-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--neon-green);
+  }
+  .xp-badge .xp-label { font-size: 0.75rem; color: var(--text-dim); }
+
+  .gami-items { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .gami-item {
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    padding: 1.4rem;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: background 0.3s, border-color 0.3s;
+    cursor: default;
+  }
+  .gami-item:hover {
+    background: rgba(155,48,255,0.07);
+    border-color: var(--border);
+  }
+
+  .gami-item-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .gami-item-text h4 { font-size: 1rem; margin-bottom: 0.3rem; }
+  .gami-item-text p  { color: var(--text-dim); font-size: 0.87rem; line-height: 1.5; }
+
+  /* ── USERS / ROLES ── */
+  #users { background: var(--bg); }
+
+  .roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-top: 4rem;
+  }
+
+  .role-card {
+    border-radius: 20px;
+    padding: 2.4rem 2rem;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .role-card::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    opacity: 0.07;
+  }
+  .role-card.student::after  { background: var(--purple-light); }
+  .role-card.parent::after   { background: var(--neon-green); }
+  .role-card.school::after   { background: var(--blue-glow); }
+  .role-card.admin::after    { background: var(--orange); }
+
+  .role-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.4);
+  }
+
+  .role-emoji { font-size: 2.2rem; margin-bottom: 1.2rem; }
+  .role-card h3 { font-size: 1.2rem; margin-bottom: 1rem; }
+
+  .perm-list { list-style: none; }
+  .perm-list li {
+    font-size: 0.86rem;
+    color: var(--text-dim);
+    padding: 0.3rem 0;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .perm-list li::before {
+    content: '';
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--purple-light);
+    flex-shrink: 0;
+  }
+
+  /* ── PRICING ── */
+  #pricing {
+    background: var(--bg2);
+    text-align: center;
+  }
+
+  .pricing-header { max-width: 560px; margin: 0 auto 4rem; }
+
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .plan-card {
+    border-radius: 22px;
+    padding: 2.8rem 2rem;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    text-align: left;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .plan-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+
+  .plan-card.featured {
+    border-color: var(--purple-light);
+    background: linear-gradient(160deg, rgba(75,0,130,0.25), rgba(26,109,255,0.1));
+  }
+  .plan-card.featured::before {
+    content: 'POPULAR';
+    position: absolute;
+    top: -12px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(90deg, var(--purple-mid), var(--blue));
+    color: #fff;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    padding: 0.28rem 0.9rem;
+    border-radius: 100px;
+  }
+
+  .plan-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+  .plan-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 0.2rem;
+    line-height: 1;
+  }
+  .plan-price .plan-currency { font-size: 1.3rem; vertical-align: top; margin-top: 0.3rem; display: inline-block; }
+  .plan-period { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 2rem; }
+
+  .plan-features { list-style: none; margin-bottom: 2.4rem; }
+  .plan-features li {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .plan-features li .check { color: var(--neon-green); font-size: 0.8rem; }
+
+  .plan-btn {
+    display: block;
+    text-align: center;
+    padding: 0.85rem;
+    border-radius: 100px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    transition: transform 0.2s, box-shadow 0.3s;
+    text-decoration: none;
+  }
+  .plan-btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .plan-btn-outline:hover { border-color: var(--purple-light); background: rgba(155,48,255,0.08); }
+  .plan-btn-solid {
+    background: linear-gradient(135deg, var(--purple-mid), var(--blue));
+    color: #fff;
+  }
+  .plan-btn-solid:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(106,13,173,0.5);
+  }
+
+  /* ── AI SECTION ── */
+  #ai {
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  #ai::before {
+    content: '';
+    position: absolute;
+    top: -100px; left: 50%; transform: translateX(-50%);
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(75,0,130,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .ai-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+    position: relative;
+  }
+
+  .ai-vars {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .ai-var {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: default;
+  }
+  .ai-var:hover {
+    border-color: var(--purple-light);
+    background: rgba(155,48,255,0.08);
+  }
+  .ai-var-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .ai-var-label { font-size: 0.9rem; color: var(--text-dim); flex: 1; }
+  .ai-var-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .ai-recs { margin-top: 4rem; }
+  .ai-recs h4 { font-size: 1.05rem; margin-bottom: 1.2rem; color: var(--text-dim); font-weight: 400; }
+
+  .rec-chips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .rec-chip {
+    padding: 0.45rem 1rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    background: var(--card-bg);
+    cursor: default;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .rec-chip:hover { border-color: var(--neon-green); color: var(--neon-green); }
+
+  /* ── QUIZ DEMO ── */
+  #quiz { background: var(--bg2); text-align: center; }
+  .quiz-header { max-width: 600px; margin: 0 auto 4rem; }
+
+  .quiz-widget {
+    max-width: 700px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2.5rem;
+    text-align: left;
+  }
+
+  .quiz-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .quiz-label { font-size: 0.78rem; letter-spacing: 0.12em; color: var(--text-dim); text-transform: uppercase; }
+  .quiz-xp { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--neon-green); font-size: 0.8rem; padding: 0.3rem 0.8rem; border-radius: 100px; }
+
+  .quiz-q { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 2rem; line-height: 1.4; }
+
+  .quiz-options { display: flex; flex-direction: column; gap: 0.9rem; }
+
+  .quiz-opt {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.4rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    text-align: left;
+    transition: all 0.2s;
+    width: 100%;
+  }
+  .quiz-opt:hover   { border-color: var(--purple-light); background: rgba(155,48,255,0.1); }
+  .quiz-opt.correct { border-color: var(--neon-green);   background: rgba(0,255,136,0.08); }
+  .quiz-opt.wrong   { border-color: #FF4560;             background: rgba(255,69,96,0.08); }
+
+  .opt-circle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .quiz-opt:hover .opt-circle { border-color: var(--purple-light); }
+  .quiz-opt.correct .opt-circle { border-color: var(--neon-green); background: rgba(0,255,136,0.2); }
+  .quiz-opt.wrong .opt-circle   { border-color: #FF4560;           background: rgba(255,69,96,0.2); }
+
+  .quiz-progress {
+    height: 4px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 100px;
+    margin-top: 2rem;
+    overflow: hidden;
+  }
+  .quiz-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple-light), var(--blue-glow));
+    border-radius: 100px;
+    transition: width 0.5s ease;
+  }
+
+  .quiz-feedback {
+    margin-top: 1.5rem;
+    padding: 1rem 1.4rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok  { background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.3); color: var(--neon-green); }
+  .quiz-feedback.err { background: rgba(255,69,96,0.08); border: 1px solid rgba(255,69,96,0.3); color: #FF4560; }
+
+  .quiz-next {
+    margin-top: 1.5rem;
+    display: none;
+    background: linear-gradient(135deg, var(--purple-mid), var(--blue));
+    color: #fff;
+    padding: 0.75rem 2rem;
+    border-radius: 100px;
+    border: none;
+    font-size: 0.95rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: box-shadow 0.3s;
+  }
+  .quiz-next:hover { box-shadow: 0 0 25px rgba(106,13,173,0.5); }
+  .quiz-next.show { display: inline-block; }
+
+  /* ── CTA ── */
+  #cta {
+    background: var(--bg);
+    text-align: center;
+    padding: 8rem 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  #cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(75,0,130,0.3) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  #cta .section-title { font-size: clamp(2.2rem, 5vw, 3.8rem); max-width: 700px; margin: 0 auto 1.5rem; }
+  #cta .section-sub { max-width: 460px; margin: 0 auto 3rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 3.5rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .footer-brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--purple-light), var(--blue-glow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .footer-links { display: flex; gap: 2rem; }
+  .footer-links a { color: var(--text-dim); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
+  .footer-copy { color: var(--text-dim); font-size: 0.82rem; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:900px) {
+    .gami-layout, .ai-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .gami-visual { height: 320px; display: none; }
+    nav .nav-links { display: none; }
+  }
+  @media(max-width:600px) {
+    .stats-bar { gap: 2rem; }
+    .plans-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; }
+  }
+
+  /* ── AUTH MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 5000;
+    background: rgba(4, 3, 10, 0.85);
+    backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: #0E0C1A;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2.8rem 2.4rem;
+    width: 100%; max-width: 420px;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.35s ease;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-close {
+    position: absolute; top: 1.2rem; right: 1.4rem;
+    background: none; border: none; color: var(--text-dim);
+    font-size: 1.3rem; cursor: pointer; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif; font-size: 1.6rem;
+    font-weight: 800; letter-spacing: -0.03em;
+    margin-bottom: 0.4rem;
+  }
+  .modal-sub { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 2rem; }
+
+  .modal-tabs {
+    display: flex; gap: 0; margin-bottom: 2rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px; padding: 4px;
+  }
+  .modal-tab {
+    flex: 1; padding: 0.55rem; border: none; background: none;
+    color: var(--text-dim); font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; cursor: pointer; border-radius: 9px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .modal-tab.active { background: var(--purple-mid); color: #fff; }
+
+  .form-field { margin-bottom: 1.1rem; }
+  .form-field label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.4rem; letter-spacing: 0.04em; }
+  .form-field input {
+    width: 100%; padding: 0.8rem 1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-field input:focus { border-color: var(--purple-light); }
+  .form-field input::placeholder { color: var(--text-dim); }
+
+  .form-error {
+    color: #FF4560; font-size: 0.82rem; margin-top: -0.6rem;
+    margin-bottom: 0.8rem; display: none;
+  }
+  .form-error.show { display: block; }
+
+  .btn-form {
+    width: 100%; padding: 0.85rem;
+    background: linear-gradient(135deg, var(--purple-mid), var(--blue));
+    color: #fff; border: none; border-radius: 100px;
+    font-size: 1rem; font-weight: 500;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    transition: box-shadow 0.3s, transform 0.2s;
+    margin-top: 0.4rem;
+  }
+  .btn-form:hover { box-shadow: 0 0 28px rgba(106,13,173,0.55); transform: translateY(-2px); }
+  .btn-form:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .divider {
+    display: flex; align-items: center; gap: 1rem;
+    color: var(--text-dim); font-size: 0.8rem; margin: 1.2rem 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: var(--border);
+  }
+
+  .btn-google {
+    width: 100%; padding: 0.8rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border); border-radius: 100px;
+    color: var(--text); font-size: 0.95rem;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 0.7rem;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-google:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); }
+
+  /* ── USER NAV BADGE ── */
+  .user-badge {
+    display: none;
+    align-items: center; gap: 0.6rem;
+    background: rgba(155,48,255,0.12);
+    border: 1px solid var(--border);
+    border-radius: 100px; padding: 0.35rem 0.9rem 0.35rem 0.5rem;
+    cursor: pointer; transition: background 0.2s;
+    position: relative;
+  }
+  .user-badge:hover { background: rgba(155,48,255,0.22); }
+  .user-badge.visible { display: flex; }
+
+  .user-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple-mid), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: #fff;
+    font-family: 'Syne', sans-serif;
+  }
+  .user-name { font-size: 0.85rem; color: var(--text); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .user-menu {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    background: #0E0C1A; border: 1px solid var(--border);
+    border-radius: 14px; padding: 0.6rem;
+    min-width: 190px; z-index: 2000;
+    display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+  .user-menu.open { display: block; }
+  .user-menu-item {
+    padding: 0.65rem 1rem; border-radius: 9px;
+    font-size: 0.88rem; cursor: pointer; color: var(--text-dim);
+    transition: background 0.2s, color 0.2s; display: flex; align-items: center; gap: 0.6rem;
+  }
+  .user-menu-item:hover { background: rgba(155,48,255,0.1); color: var(--text); }
+  .user-menu-item.danger:hover { background: rgba(255,69,96,0.1); color: #FF4560; }
+
+  /* ── PROGRESS DASHBOARD ── */
+  .dash-overlay {
+    position: fixed; inset: 0; z-index: 4000;
+    background: rgba(4, 3, 10, 0.88);
+    backdrop-filter: blur(14px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .dash-overlay.open { opacity: 1; pointer-events: all; }
+
+  .dash-panel {
+    background: #0E0C1A; border: 1px solid var(--border);
+    border-radius: 26px; padding: 2.4rem;
+    width: 100%; max-width: 680px; max-height: 88vh; overflow-y: auto;
+    transform: translateY(24px); transition: transform 0.35s ease;
+    position: relative;
+  }
+  .dash-overlay.open .dash-panel { transform: translateY(0); }
+
+  .dash-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+  .dash-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
+  .dash-email { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.2rem; }
+
+  .dash-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.8rem; }
+  .dash-stat {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.2rem; text-align: center;
+  }
+  .dash-stat-val {
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    background: linear-gradient(90deg, var(--purple-light), var(--blue-glow));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .dash-stat-label { color: var(--text-dim); font-size: 0.78rem; margin-top: 0.3rem; }
+
+  .dash-section-title { font-family: 'Syne', sans-serif; font-size: 0.9rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.9rem; }
+
+  .progress-bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.7rem; }
+  .progress-bar-label { font-size: 0.88rem; flex: 1; }
+  .progress-bar-bg { flex: 2; height: 6px; background: rgba(255,255,255,0.07); border-radius: 100px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--purple-light), var(--neon-green)); transition: width 0.8s ease; }
+  .progress-bar-pct { font-size: 0.8rem; color: var(--text-dim); width: 36px; text-align: right; }
+
+  .worlds-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 0.3rem; }
+  .world-chip {
+    padding: 0.4rem 0.9rem; border-radius: 100px;
+    border: 1px solid var(--border); font-size: 0.82rem; color: var(--text-dim);
+  }
+  .world-chip.unlocked { border-color: var(--neon-green); color: var(--neon-green); background: rgba(0,255,136,0.07); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 9000;
+    background: #13111F; border: 1px solid var(--border);
+    border-radius: 14px; padding: 1rem 1.4rem;
+    font-size: 0.9rem; box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    transform: translateY(20px); opacity: 0;
+    transition: all 0.35s ease; pointer-events: none; max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.ok   { border-color: rgba(0,255,136,0.4); }
+  .toast.err  { border-color: rgba(255,69,96,0.4); }
+
+  /* ── LOGIN REQUIRED OVERLAY ── */
+  .quiz-lock {
+    display: none; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; gap: 1rem;
+    padding: 2rem;
+  }
+  .quiz-lock.show { display: flex; }
+  .quiz-lock h3 { font-size: 1.2rem; }
+  .quiz-lock p { color: var(--text-dim); font-size: 0.9rem; }
+
+  /* Colored icon backgrounds */
+  .bg-purple { background: rgba(155,48,255,0.15); }
+  .bg-blue   { background: rgba(26,109,255,0.15); }
+  .bg-green  { background: rgba(0,255,136,0.12); }
+  .bg-orange { background: rgba(255,122,48,0.15); }
+
+  /* Dot colors for AI vars */
+  .dot-purple { background: var(--purple-light); }
+  .dot-blue   { background: var(--blue-glow); }
+  .dot-green  { background: var(--neon-green); }
+  .dot-orange { background: var(--orange); }
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="brand">StoryPlay</div>
+  <ul class="nav-links">
+    <li><a href="#features">Funciones</a></li>
+    <li><a href="#gamification">Gamificación</a></li>
+    <li><a href="#users">Usuarios</a></li>
+    <li><a href="#pricing">Planes</a></li>
+    <li><a href="#quiz">Quiz Demo</a></li>
+  </ul>
+  <!-- Usuario NO autenticado -->
+  <div id="navAuthBtns" style="display:flex;gap:0.7rem;align-items:center;">
+    <button onclick="openModal('login')" class="btn-ghost" style="padding:0.5rem 1.2rem;font-size:0.9rem;">Iniciar sesión</button>
+    <button onclick="openModal('register')" class="nav-cta" style="border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Crear cuenta</button>
+  </div>
+  <!-- Usuario autenticado -->
+  <div class="user-badge" id="userBadge" onclick="toggleUserMenu()">
+    <div class="user-avatar" id="userAvatar">?</div>
+    <span class="user-name" id="userName">Usuario</span>
+    <span style="color:var(--text-dim);font-size:0.8rem;">▾</span>
+    <div class="user-menu" id="userMenu">
+      <div class="user-menu-item" onclick="openDash()">📊 Mi progreso</div>
+      <div class="user-menu-item" onclick="openModal('login')">⚙️ Configuración</div>
+      <div class="user-menu-item danger" onclick="logout()">🚪 Cerrar sesión</div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-badge">✦ Plataforma educativa con IA adaptativa</div>
+  <h1>Tu universo de lectura,<br/><span>infinitamente personalizado</span></h1>
+  <p class="hero-sub">
+    StoryPlay combina entretenimiento, educación e inteligencia artificial para transformar
+    cómo los jóvenes leen, aprenden y evolucionan.
+  </p>
+  <div class="hero-actions">
+    <a href="#cta" class="btn-primary">Comenzar gratis</a>
+    <a href="#features" class="btn-ghost">Explorar funciones ↓</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item reveal">
+    <div class="stat-num" data-count="7">0</div>
+    <div class="stat-label">Módulos integrados</div>
+  </div>
+  <div class="stat-item reveal">
+    <div class="stat-num" data-count="6">0</div>
+    <div class="stat-label">Mundos interactivos</div>
+  </div>
+  <div class="stat-item reveal">
+    <div class="stat-num" data-count="100">0</div>
+    <div class="stat-label">% contenido adaptativo</div>
+  </div>
+  <div class="stat-item reveal">
+    <div class="stat-num" data-count="4">0</div>
+    <div class="stat-label">Roles de usuario</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="features-header reveal">
+    <div class="section-tag">✦ Módulos</div>
+    <h2 class="section-title">Todo lo que necesitas para leer mejor</h2>
+    <p class="section-sub">7 módulos diseñados para crear una experiencia de lectura completa, medible y adictiva.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon bg-purple">🧠</div>
+      <h3>Motor de IA Adaptativa</h3>
+      <p>Analiza tu velocidad, comprensión y preferencias para adaptar dificultad, temática y longitud en tiempo real.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon bg-blue">📚</div>
+      <h3>Biblioteca de Ficción</h3>
+      <p>Fantasía, sci-fi, terror, romance, distopía y más. Con capítulos desbloqueables y decisiones interactivas que cambian la historia.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon bg-green">🎓</div>
+      <h3>Biblioteca Académica</h3>
+      <p>Artículos científicos, textos STEM y análisis históricos con resúmenes, glosario y herramientas de subrayado inteligente.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon bg-orange">🎮</div>
+      <h3>Sistema de Gamificación</h3>
+      <p>XP, monedas virtuales, rachas, niveles e insignias. Cada lectura te acerca a desbloquear nuevos mundos y personajes.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon bg-purple">📊</div>
+      <h3>Analítica de Progreso</h3>
+      <p>Dashboards detallados para estudiantes, padres e instituciones. Métricas reales de comprensión y evolución.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon bg-blue">👥</div>
+      <h3>Sistema Social</h3>
+      <p>Amigos, rankings, clubes de lectura y retos grupales con moderación IA para mantener el entorno seguro.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="reveal">
+    <div class="section-tag">✦ Proceso</div>
+    <h2 class="section-title">¿Cómo funciona?</h2>
+  </div>
+  <div class="how-grid">
+    <div class="how-step reveal">
+      <div class="step-num">1</div>
+      <h3>Regístrate</h3>
+      <p>Crea tu cuenta con Google, Apple o correo. En minutos tienes tu perfil listo.</p>
+    </div>
+    <div class="how-step reveal">
+      <div class="step-num">2</div>
+      <h3>Test inteligente</h3>
+      <p>La IA evalúa tu nivel lector, velocidad, temas favoritos y comprensión para crear tu perfil personalizado.</p>
+    </div>
+    <div class="how-step reveal">
+      <div class="step-num">3</div>
+      <h3>Lee y juega</h3>
+      <p>Accede a historias y contenido académico adaptado a ti. Completa quizzes y gana XP con cada sesión.</p>
+    </div>
+    <div class="how-step reveal">
+      <div class="step-num">4</div>
+      <h3>Evoluciona</h3>
+      <p>Sube de nivel, desbloquea mundos, gana insignias y ve tu comprensión mejorar semana a semana.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GAMIFICATION -->
+<section id="gamification">
+  <div class="gami-layout">
+    <div class="reveal">
+      <div class="section-tag">✦ Gamificación</div>
+      <h2 class="section-title">Leer nunca fue tan adictivo</h2>
+      <p class="section-sub" style="margin-bottom:2.5rem;">Un sistema de recompensas completo que mantiene la motivación encendida día tras día.</p>
+
+      <div class="gami-items">
+        <div class="gami-item">
+          <div class="gami-item-icon bg-purple">⚡</div>
+          <div class="gami-item-text">
+            <h4>XP &amp; Niveles</h4>
+            <p>Gana puntos de experiencia leyendo, respondiendo quizzes y manteniendo rachas diarias. Cada nivel desbloquea contenido nuevo.</p>
+          </div>
+        </div>
+        <div class="gami-item">
+          <div class="gami-item-icon bg-orange">🪙</div>
+          <div class="gami-item-text">
+            <h4>Monedas virtuales</h4>
+            <p>Personaliza tu avatar, desbloquea efectos especiales y accede a mundos exclusivos con las monedas que ganas leyendo.</p>
+          </div>
+        </div>
+        <div class="gami-item">
+          <div class="gami-item-icon bg-green">🔥</div>
+          <div class="gami-item-text">
+            <h4>Rachas &amp; Recordatorios</h4>
+            <p>El sistema registra tus días consecutivos y te recompensa por la constancia. Nunca pierdas tu racha.</p>
+          </div>
+        </div>
+        <div class="gami-item">
+          <div class="gami-item-icon bg-blue">🏆</div>
+          <div class="gami-item-text">
+            <h4>Logros &amp; Insignias</h4>
+            <p>Colecciona insignias únicas al completar hitos de lectura, géneros y retos especiales.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gami-visual reveal">
+      <div class="world-card">
+        <div class="w-icon">🏰</div>
+        <div class="w-name">Reino Fantasía</div>
+        <div class="w-bar"><div class="w-fill" style="width:78%"></div></div>
+      </div>
+      <div class="world-card">
+        <div class="w-icon">🤖</div>
+        <div class="w-name">Ciudad Cyberpunk</div>
+        <div class="w-bar"><div class="w-fill" style="width:45%"></div></div>
+      </div>
+      <div class="world-card">
+        <div class="w-icon">🌲</div>
+        <div class="w-name">Bosque Misterioso</div>
+        <div class="w-bar"><div class="w-fill" style="width:30%"></div></div>
+      </div>
+      <div class="world-card">
+        <div class="w-icon">🚀</div>
+        <div class="w-name">Mundo Espacial</div>
+        <div class="w-bar"><div class="w-fill" style="width:12%"></div></div>
+      </div>
+      <div class="xp-badge">
+        <div class="xp-num">2,840</div>
+        <div class="xp-label">XP TOTAL</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI SECTION -->
+<section id="ai">
+  <div class="ai-layout">
+    <div class="reveal">
+      <div class="section-tag">✦ Inteligencia Artificial</div>
+      <h2 class="section-title">Una IA que te conoce mejor cada día</h2>
+      <p class="section-sub">El motor de personalización analiza múltiples variables para adaptar cada sesión de lectura a tu nivel y preferencias exactas.</p>
+    </div>
+    <div class="reveal">
+      <div class="ai-vars">
+        <div class="ai-var">
+          <div class="ai-var-dot dot-purple"></div>
+          <span class="ai-var-label">Velocidad de lectura</span>
+          <span class="ai-var-val">248 ppm</span>
+        </div>
+        <div class="ai-var">
+          <div class="ai-var-dot dot-green"></div>
+          <span class="ai-var-label">Comprensión promedio</span>
+          <span class="ai-var-val">87%</span>
+        </div>
+        <div class="ai-var">
+          <div class="ai-var-dot dot-blue"></div>
+          <span class="ai-var-label">Géneros preferidos</span>
+          <span class="ai-var-val">Sci-fi, Misterio</span>
+        </div>
+        <div class="ai-var">
+          <div class="ai-var-dot dot-orange"></div>
+          <span class="ai-var-label">Tasa de abandono</span>
+          <span class="ai-var-val">Baja 12%</span>
+        </div>
+        <div class="ai-var">
+          <div class="ai-var-dot dot-purple"></div>
+          <span class="ai-var-label">Actividad diaria</span>
+          <span class="ai-var-val">6 días activos</span>
+        </div>
+        <div class="ai-var">
+          <div class="ai-var-dot dot-green"></div>
+          <span class="ai-var-label">Dificultad recomendada</span>
+          <span class="ai-var-val">Avanzada</span>
+        </div>
+      </div>
+      <div class="ai-recs" style="margin-top:2rem;">
+        <h4>La IA recomienda para ti →</h4>
+        <div class="rec-chips">
+          <span class="rec-chip">🌌 Historias de ciencia ficción</span>
+          <span class="rec-chip">🧩 Retos de inferencia</span>
+          <span class="rec-chip">📰 Artículos STEM</span>
+          <span class="rec-chip">⚔️ Ruta Aventura Épica</span>
+          <span class="rec-chip">🔬 Quiz de análisis crítico</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USERS / ROLES -->
+<section id="users">
+  <div class="reveal" style="text-align:center;max-width:600px;margin:0 auto 0;">
+    <div class="section-tag">✦ Para todos</div>
+    <h2 class="section-title">Diseñado para cada rol</h2>
+    <p class="section-sub" style="margin:0 auto;">Un ecosistema completo donde estudiantes, padres, colegios y administradores tienen su propio espacio.</p>
+  </div>
+  <div class="roles-grid">
+    <div class="role-card student reveal">
+      <div class="role-emoji">🎒</div>
+      <h3>Estudiante</h3>
+      <ul class="perm-list">
+        <li>Leer contenido personalizado</li>
+        <li>Completar quizzes adaptativos</li>
+        <li>Subir de nivel y ganar XP</li>
+        <li>Personalizar avatar y mundos</li>
+        <li>Recibir recomendaciones IA</li>
+      </ul>
+    </div>
+    <div class="role-card parent reveal">
+      <div class="role-emoji">👨‍👩‍👧</div>
+      <h3>Padre de Familia</h3>
+      <ul class="perm-list">
+        <li>Visualizar progreso del hijo</li>
+        <li>Ver estadísticas detalladas</li>
+        <li>Administrar suscripción</li>
+        <li>Controlar tiempo de uso</li>
+        <li>Recibir reportes periódicos</li>
+      </ul>
+    </div>
+    <div class="role-card school reveal">
+      <div class="role-emoji">🏫</div>
+      <h3>Institución Educativa</h3>
+      <ul class="perm-list">
+        <li>Crear y gestionar grupos</li>
+        <li>Monitorear estudiantes</li>
+        <li>Acceder a métricas generales</li>
+        <li>Asignar lecturas específicas</li>
+        <li>Exportar reportes PDF/Excel</li>
+      </ul>
+    </div>
+    <div class="role-card admin reveal">
+      <div class="role-emoji">⚙️</div>
+      <h3>Administrador</h3>
+      <ul class="perm-list">
+        <li>Gestión total del contenido</li>
+        <li>Moderación de usuarios</li>
+        <li>Control de monetización</li>
+        <li>Análisis de métricas globales</li>
+        <li>Moderación IA avanzada</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ DEMO -->
+<section id="quiz">
+  <div class="quiz-header reveal">
+    <div class="section-tag">✦ Quiz Demo</div>
+    <h2 class="section-title">Prueba el sistema de quizzes</h2>
+    <p class="section-sub">Así evalúa StoryPlay tu comprensión lectora. Interactivo, adaptativo y con feedback inmediato.</p>
+  </div>
+
+  <div class="quiz-widget reveal" id="quizWidget">
+    <div class="quiz-top">
+      <span class="quiz-label" id="quizLabel">Pregunta 1 de 3</span>
+      <span class="quiz-xp" id="quizXp">+0 XP</span>
+    </div>
+    <div class="quiz-q" id="quizQuestion">
+      Después de leer un texto sobre ecosistemas marinos, ¿cuál es la principal amenaza que señalan los científicos para los arrecifes de coral?
+    </div>
+    <div class="quiz-options" id="quizOptions">
+      <button class="quiz-opt" onclick="answer(this, false)">
+        <div class="opt-circle">A</div>
+        La sobrepesca de tiburones
+      </button>
+      <button class="quiz-opt" onclick="answer(this, true)">
+        <div class="opt-circle">B</div>
+        El calentamiento global y la acidificación del océano
+      </button>
+      <button class="quiz-opt" onclick="answer(this, false)">
+        <div class="opt-circle">C</div>
+        La contaminación por plástico únicamente
+      </button>
+      <button class="quiz-opt" onclick="answer(this, false)">
+        <div class="opt-circle">D</div>
+        Las corrientes marinas frías
+      </button>
+    </div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+    <button class="quiz-next" id="quizNext" onclick="nextQuestion()">Siguiente →</button>
+    <div class="quiz-progress">
+      <div class="quiz-progress-fill" id="quizProgress" style="width:33%"></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="pricing-header reveal">
+    <div class="section-tag">✦ Planes</div>
+    <h2 class="section-title">Elige tu nivel de lectura</h2>
+    <p class="section-sub">Desde acceso gratuito hasta soluciones institucionales completas.</p>
+  </div>
+  <div class="plans-grid">
+    <div class="plan-card reveal">
+      <div class="plan-name">Gratuito</div>
+      <div class="plan-price"><span class="plan-currency">$</span>0</div>
+      <div class="plan-period">Para siempre gratis</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Acceso limitado a historias</li>
+        <li><span class="check">✓</span> Quizzes básicos</li>
+        <li><span class="check">✓</span> Perfil IA básico</li>
+        <li><span class="check">✓</span> 1 mundo disponible</li>
+        <li style="opacity:0.4"><span>✗</span> Sin anuncios</li>
+        <li style="opacity:0.4"><span>✗</span> IA avanzada</li>
+      </ul>
+      <button class="plan-btn plan-btn-outline">Empezar gratis</button>
+    </div>
+    <div class="plan-card featured reveal">
+      <div class="plan-name">Premium Individual</div>
+      <div class="plan-price"><span class="plan-currency">$</span>9<span style="font-size:1rem;color:var(--text-dim)">.99</span></div>
+      <div class="plan-period">/ mes · cancela cuando quieras</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Acceso total a biblioteca</li>
+        <li><span class="check">✓</span> IA avanzada y adaptativa</li>
+        <li><span class="check">✓</span> Estadísticas completas</li>
+        <li><span class="check">✓</span> Todos los mundos premium</li>
+        <li><span class="check">✓</span> Sin publicidad</li>
+        <li><span class="check">✓</span> Recomendaciones personalizadas</li>
+      </ul>
+      <button class="plan-btn plan-btn-solid">Comenzar Premium</button>
+    </div>
+    <div class="plan-card reveal">
+      <div class="plan-name">Premium Familiar</div>
+      <div class="plan-price"><span class="plan-currency">$</span>17<span style="font-size:1rem;color:var(--text-dim)">.99</span></div>
+      <div class="plan-period">/ mes · hasta 5 perfiles</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Todo lo de Premium</li>
+        <li><span class="check">✓</span> Múltiples perfiles</li>
+        <li><span class="check">✓</span> Control parental avanzado</li>
+        <li><span class="check">✓</span> Reportes para padres</li>
+        <li><span class="check">✓</span> Dashboard familiar</li>
+        <li><span class="check">✓</span> Alertas de actividad</li>
+      </ul>
+      <button class="plan-btn plan-btn-outline">Plan Familiar</button>
+    </div>
+    <div class="plan-card reveal">
+      <div class="plan-name">Institucional</div>
+      <div class="plan-price" style="font-size:2rem;">Custom</div>
+      <div class="plan-period">contacta a ventas</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Panel docente completo</li>
+        <li><span class="check">✓</span> Grupos y asignaciones</li>
+        <li><span class="check">✓</span> Reportes masivos PDF/Excel</li>
+        <li><span class="check">✓</span> Administración centralizada</li>
+        <li><span class="check">✓</span> Ranking académico grupal</li>
+        <li><span class="check">✓</span> Soporte prioritario</li>
+      </ul>
+      <button class="plan-btn plan-btn-outline">Contactar ventas</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="section-tag reveal">✦ Únete ahora</div>
+  <h2 class="section-title reveal">Empieza a leer.<br/>Empieza a evolucionar.</h2>
+  <p class="section-sub reveal">StoryPlay no es solo una app para leer. Es tu ecosistema de desarrollo intelectual, gamificado y potenciado por IA.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;" class="reveal">
+    <button onclick="openModal('register')" class="btn-primary">Crear cuenta gratis</button>
+    <button onclick="openModal('login')" class="btn-ghost">Iniciar sesión</button>
+  </div>
+</section>
+
+<!-- ── AUTH MODAL ── -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Bienvenido a StoryPlay</div>
+    <div class="modal-sub">Tu universo de lectura personalizado te espera.</div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabLogin" onclick="switchTab('login')">Iniciar sesión</button>
+      <button class="modal-tab" id="tabRegister" onclick="switchTab('register')">Crear cuenta</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="formLogin">
+      <div class="form-field">
+        <label>Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="tu@correo.com" />
+      </div>
+      <div class="form-field">
+        <label>Contraseña</label>
+        <input type="password" id="loginPass" placeholder="••••••••" />
+      </div>
+      <div class="form-error" id="loginError"></div>
+      <button class="btn-form" id="loginBtn" onclick="loginEmail()">Iniciar sesión</button>
+      <div class="divider">o continúa con</div>
+      <button class="btn-google" onclick="loginGoogle()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.93 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continuar con Google
+      </button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="formRegister" style="display:none;">
+      <div class="form-field">
+        <label>Nombre completo</label>
+        <input type="text" id="regName" placeholder="Tu nombre" />
+      </div>
+      <div class="form-field">
+        <label>Correo electrónico</label>
+        <input type="email" id="regEmail" placeholder="tu@correo.com" />
+      </div>
+      <div class="form-field">
+        <label>Contraseña</label>
+        <input type="password" id="regPass" placeholder="Mínimo 6 caracteres" />
+      </div>
+      <div class="form-error" id="regError"></div>
+      <button class="btn-form" id="regBtn" onclick="registerEmail()">Crear cuenta gratis</button>
+      <div class="divider">o regístrate con</div>
+      <button class="btn-google" onclick="loginGoogle()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.93 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continuar con Google
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PROGRESS DASHBOARD ── -->
+<div class="dash-overlay" id="dashOverlay">
+  <div class="dash-panel">
+    <button class="modal-close" onclick="closeDash()">✕</button>
+    <div class="dash-header">
+      <div>
+        <div class="dash-title" id="dashName">Mi Progreso</div>
+        <div class="dash-email" id="dashEmail"></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:0.75rem;color:var(--text-dim);">Plan actual</div>
+        <div id="dashPlan" style="font-family:'Syne',sans-serif;font-weight:700;color:var(--purple-light);">Gratuito</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-stat">
+        <div class="dash-stat-val" id="dashXp">0</div>
+        <div class="dash-stat-label">XP Total</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-val" id="dashNivel">1</div>
+        <div class="dash-stat-label">Nivel</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-val" id="dashRacha">0</div>
+        <div class="dash-stat-label">Racha 🔥</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1.8rem;">
+      <div class="dash-section-title">Comprensión por categoría</div>
+      <div class="progress-bar-row">
+        <span class="progress-bar-label">🌌 Ciencia Ficción</span>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="pb1" style="width:0%"></div></div>
+        <span class="progress-bar-pct" id="pp1">0%</span>
+      </div>
+      <div class="progress-bar-row">
+        <span class="progress-bar-label">🔬 Académico</span>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="pb2" style="width:0%"></div></div>
+        <span class="progress-bar-pct" id="pp2">0%</span>
+      </div>
+      <div class="progress-bar-row">
+        <span class="progress-bar-label">🏰 Fantasía</span>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="pb3" style="width:0%"></div></div>
+        <span class="progress-bar-pct" id="pp3">0%</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="dash-section-title">Mundos desbloqueados</div>
+      <div class="worlds-row" id="dashWorlds">
+        <span class="world-chip unlocked">🏰 Reino Fantasía</span>
+        <span class="world-chip" id="wc2">🤖 Ciudad Cyberpunk</span>
+        <span class="world-chip" id="wc3">🌲 Bosque Misterioso</span>
+        <span class="world-chip" id="wc4">🚀 Mundo Espacial</span>
+        <span class="world-chip" id="wc5">📚 Biblioteca Infinita</span>
+        <span class="world-chip" id="wc6">🔬 Laboratorio</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ══════════════════════════════════════════════
+  //  ⚙️  CONFIGURACIÓN FIREBASE
+  //  👇  Reemplaza estos valores con los tuyos de:
+  //      https://console.firebase.google.com
+  // ══════════════════════════════════════════════
+  const firebaseConfig = {
+    apiKey: "AIzaSyAhgbEsfBXR6Ox7qogSxmfHCetrI1jMwfY",
+    authDomain: "storyplay-lectura.firebaseapp.com",
+    projectId: "storyplay-lectura",
+    storageBucket: "storyplay-lectura.firebasestorage.app",
+    messagingSenderId: "891488967017",
+    appId: "1:891488967017:web:60cc0c5fe1e575854b85f8",
+    measurementId: "G-N4HNYGCMPJ"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  // ── TOAST ─────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, type = 'ok') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = `toast ${type} show`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.className = 'toast', 3200);
+  }
+
+  // ── MODAL ─────────────────────────────────────
+  function openModal(tab = 'login') {
+    document.getElementById('authModal').classList.add('open');
+    switchTab(tab);
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('authModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('authModal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('formLogin').style.display    = isLogin ? 'block' : 'none';
+    document.getElementById('formRegister').style.display = isLogin ? 'none'  : 'block';
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  }
+
+  // ── AUTH: REGISTRO ────────────────────────────
+  async function registerEmail() {
+    const name  = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass  = document.getElementById('regPass').value;
+    const err   = document.getElementById('regError');
+    const btn   = document.getElementById('regBtn');
+
+    if (!name || !email || !pass) { showErr(err, 'Completa todos los campos.'); return; }
+    if (pass.length < 6)          { showErr(err, 'La contraseña debe tener al menos 6 caracteres.'); return; }
+
+    btn.disabled = true; btn.textContent = 'Creando cuenta...';
+    try {
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      await cred.user.updateProfile({ displayName: name });
+      await crearPerfilUsuario(cred.user.uid, name, email);
+      closeModal();
+      showToast(`¡Bienvenido, ${name}! 🎉 Tu cuenta fue creada.`);
+    } catch(e) {
+      showErr(err, traducirError(e.code));
+    } finally {
+      btn.disabled = false; btn.textContent = 'Crear cuenta gratis';
+    }
+  }
+
+  // ── AUTH: LOGIN EMAIL ─────────────────────────
+  async function loginEmail() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPass').value;
+    const err   = document.getElementById('loginError');
+    const btn   = document.getElementById('loginBtn');
+
+    if (!email || !pass) { showErr(err, 'Completa todos los campos.'); return; }
+
+    btn.disabled = true; btn.textContent = 'Entrando...';
+    try {
+      await auth.signInWithEmailAndPassword(email, pass);
+      closeModal();
+      showToast('¡Bienvenido de nuevo! 👋');
+    } catch(e) {
+      showErr(err, traducirError(e.code));
+    } finally {
+      btn.disabled = false; btn.textContent = 'Iniciar sesión';
+    }
+  }
+
+  // ── AUTH: GOOGLE ──────────────────────────────
+  async function loginGoogle() {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const cred = await auth.signInWithPopup(provider);
+      const user = cred.user;
+      // Si es nuevo usuario, crear perfil
+      const doc = await db.collection('usuarios').doc(user.uid).get();
+      if (!doc.exists) await crearPerfilUsuario(user.uid, user.displayName, user.email);
+      closeModal();
+      showToast(`¡Hola, ${user.displayName?.split(' ')[0]}! 🎉`);
+    } catch(e) {
+      showToast('Error al iniciar con Google. Intenta de nuevo.', 'err');
+    }
+  }
+
+  // ── AUTH: LOGOUT ──────────────────────────────
+  async function logout() {
+    await auth.signOut();
+    toggleUserMenu(false);
+    showToast('Sesión cerrada. ¡Hasta pronto! 👋');
+  }
+
+  // ── FIRESTORE: CREAR PERFIL ───────────────────
+  async function crearPerfilUsuario(uid, nombre, email) {
+    await db.collection('usuarios').doc(uid).set({
+      nombre,
+      email,
+      xp: 0,
+      nivel: 1,
+      racha: 0,
+      plan: 'gratuito',
+      quizCompletados: 0,
+      comprension: { scifi: 0, academico: 0, fantasia: 0 },
+      mundosDesbloqueados: ['fantasia'],
+      creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+      ultimaConexion: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  // ── FIRESTORE: GUARDAR PROGRESO ───────────────
+  async function guardarProgreso(uid, xpGanado, aciertos, total) {
+    try {
+      const ref = db.collection('usuarios').doc(uid);
+      const doc = await ref.get();
+      if (!doc.exists) return;
+
+      const d = doc.data();
+      const nuevoXP     = (d.xp || 0) + xpGanado;
+      const nuevoNivel  = Math.floor(nuevoXP / 200) + 1;
+      const nuevaRacha  = (d.racha || 0) + 1;
+      const pctAciertos = total > 0 ? Math.round((aciertos / total) * 100) : 0;
+
+      // Desbloquear mundos según XP
+      const mundos = [...(d.mundosDesbloqueados || ['fantasia'])];
+      if (nuevoXP >= 200  && !mundos.includes('cyberpunk'))  mundos.push('cyberpunk');
+      if (nuevoXP >= 500  && !mundos.includes('bosque'))     mundos.push('bosque');
+      if (nuevoXP >= 900  && !mundos.includes('espacial'))   mundos.push('espacial');
+      if (nuevoXP >= 1400 && !mundos.includes('biblioteca')) mundos.push('biblioteca');
+      if (nuevoXP >= 2000 && !mundos.includes('laboratorio'))mundos.push('laboratorio');
+
+      await ref.update({
+        xp: nuevoXP,
+        nivel: nuevoNivel,
+        racha: nuevaRacha,
+        quizCompletados: firebase.firestore.FieldValue.increment(1),
+        'comprension.scifi': Math.round(((d.comprension?.scifi || 0) + pctAciertos) / 2),
+        mundosDesbloqueados: mundos,
+        ultimaConexion: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      showToast(`+${xpGanado} XP guardados ✅ — Nivel ${nuevoNivel}`);
+    } catch(e) {
+      console.error('Error guardando progreso:', e);
+    }
+  }
+
+  // ── FIRESTORE: CARGAR PROGRESO ────────────────
+  async function cargarProgreso(uid) {
+    try {
+      const doc = await db.collection('usuarios').doc(uid).get();
+      if (!doc.exists) return null;
+      return doc.data();
+    } catch(e) {
+      console.error('Error cargando progreso:', e);
+      return null;
+    }
+  }
+
+  // ── DASHBOARD ─────────────────────────────────
+  async function openDash() {
+    toggleUserMenu(false);
+    const user = auth.currentUser;
+    if (!user) return;
+    const data = await cargarProgreso(user.uid);
+    if (!data) return;
+
+    document.getElementById('dashName').textContent  = data.nombre || user.displayName || 'Usuario';
+    document.getElementById('dashEmail').textContent = data.email  || user.email || '';
+    document.getElementById('dashPlan').textContent  = capitalizar(data.plan || 'gratuito');
+    document.getElementById('dashXp').textContent    = data.xp    || 0;
+    document.getElementById('dashNivel').textContent = data.nivel  || 1;
+    document.getElementById('dashRacha').textContent = data.racha  || 0;
+
+    // Barras de progreso
+    const c = data.comprension || {};
+    setBar('pb1','pp1', c.scifi     || 0);
+    setBar('pb2','pp2', c.academico || 0);
+    setBar('pb3','pp3', c.fantasia  || 0);
+
+    // Mundos
+    const mundos = data.mundosDesbloqueados || [];
+    [['wc2','cyberpunk'],['wc3','bosque'],['wc4','espacial'],['wc5','biblioteca'],['wc6','laboratorio']]
+      .forEach(([id, key]) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('unlocked', mundos.includes(key));
+      });
+
+    document.getElementById('dashOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDash() {
+    document.getElementById('dashOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('dashOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeDash();
+  });
+
+  function setBar(barId, pctId, val) {
+    setTimeout(() => {
+      document.getElementById(barId).style.width = val + '%';
+      document.getElementById(pctId).textContent = val + '%';
+    }, 200);
+  }
+
+  // ── USER MENU ─────────────────────────────────
+  function toggleUserMenu(force) {
+    const m = document.getElementById('userMenu');
+    const open = force !== undefined ? force : !m.classList.contains('open');
+    m.classList.toggle('open', open);
+  }
+  document.addEventListener('click', e => {
+    if (!document.getElementById('userBadge').contains(e.target))
+      toggleUserMenu(false);
+  });
+
+  // ── AUTH STATE ────────────────────────────────
+  auth.onAuthStateChanged(async user => {
+    const navBtns = document.getElementById('navAuthBtns');
+    const badge   = document.getElementById('userBadge');
+
+    if (user) {
+      navBtns.style.display = 'none';
+      badge.classList.add('visible');
+      const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+      document.getElementById('userAvatar').textContent = initial;
+      document.getElementById('userName').textContent   = user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Usuario';
+
+      // Actualizar última conexión
+      try {
+        await db.collection('usuarios').doc(user.uid).update({
+          ultimaConexion: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch(e) {} // Si no existe el doc, ignora
+
+    } else {
+      navBtns.style.display = 'flex';
+      badge.classList.remove('visible');
+    }
+  });
+
+  // ── HELPERS ───────────────────────────────────
+  function showErr(el, msg) { el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 4000); }
+  function capitalizar(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function traducirError(code) {
+    const map = {
+      'auth/email-already-in-use':    'Este correo ya tiene una cuenta. Inicia sesión.',
+      'auth/invalid-email':           'Correo electrónico inválido.',
+      'auth/weak-password':           'La contraseña es muy débil.',
+      'auth/user-not-found':          'No existe cuenta con ese correo.',
+      'auth/wrong-password':          'Contraseña incorrecta.',
+      'auth/too-many-requests':       'Demasiados intentos. Espera un momento.',
+      'auth/popup-closed-by-user':    'Ventana cerrada. Intenta de nuevo.',
+    };
+    return map[code] || 'Ocurrió un error. Intenta de nuevo.';
+  }
+</script>
+<footer>
+  <div class="footer-brand">StoryPlay</div>
+  <div class="footer-links">
+    <a href="#">Privacidad</a>
+    <a href="#">Términos</a>
+    <a href="#">Soporte</a>
+    <a href="#">Instituciones</a>
+    <a href="#">Blog</a>
+  </div>
+  <div class="footer-copy">© 2025 StoryPlay. Todos los derechos reservados.</div>
+</footer>
+
+<script>
+  // ── CURSOR ──────────────────────────────────────────────
+  const cursor = document.getElementById('cursor');
+  const ring   = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 7  + 'px';
+    cursor.style.top  = my - 7  + 'px';
+  });
+
+  (function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx - 18 + 'px';
+    ring.style.top  = ry - 18 + 'px';
+    requestAnimationFrame(animRing);
+  })();
+
+  document.querySelectorAll('a,button,.quiz-opt,.gami-item,.ai-var,.rec-chip').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.style.transform = 'scale(2.5)');
+    el.addEventListener('mouseleave', () => cursor.style.transform = 'scale(1)');
+  });
+
+  // ── SCROLL REVEAL ────────────────────────────────────────
+  const revealEls = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => obs.observe(el));
+
+  // ── COUNT-UP STATS ───────────────────────────────────────
+  const statNums = document.querySelectorAll('.stat-num[data-count]');
+  const statObs  = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el  = e.target;
+        const end = parseInt(el.dataset.count);
+        let cur   = 0;
+        const step = Math.max(1, Math.ceil(end / 40));
+        const t = setInterval(() => {
+          cur = Math.min(cur + step, end);
+          el.textContent = cur + (el.dataset.count === '100' ? '%' : '+');
+          if (cur >= end) clearInterval(t);
+        }, 35);
+        statObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  statNums.forEach(el => statObs.observe(el));
+
+  // ── QUIZ ─────────────────────────────────────────────────
+  const quizData = [
+    {
+      q: 'Después de leer un texto sobre ecosistemas marinos, ¿cuál es la principal amenaza que señalan los científicos para los arrecifes de coral?',
+      opts: [
+        { text: 'La sobrepesca de tiburones', ok: false },
+        { text: 'El calentamiento global y la acidificación del océano', ok: true },
+        { text: 'La contaminación por plástico únicamente', ok: false },
+        { text: 'Las corrientes marinas frías', ok: false },
+      ],
+      fb_ok: '✅ ¡Correcto! El calentamiento global provoca el blanqueamiento de corales y la acidificación reduce su capacidad de formar esqueletos de carbonato de calcio.',
+      fb_err: '❌ Incorrecto. La respuesta correcta es B. El calentamiento global y la acidificación del océano son las amenazas principales documentadas por los científicos.',
+    },
+    {
+      q: '¿Qué proceso realiza la fotosíntesis como función principal dentro del ecosistema?',
+      opts: [
+        { text: 'Descomposición de materia orgánica muerta', ok: false },
+        { text: 'Capturar CO₂ y convertirlo en oxígeno y glucosa usando luz solar', ok: true },
+        { text: 'Absorber minerales del suelo para las raíces', ok: false },
+        { text: 'Regular la temperatura ambiental del entorno', ok: false },
+      ],
+      fb_ok: '✅ ¡Excelente! La fotosíntesis convierte energía lumínica en química, produciendo oxígeno y glucosa que sostienen la cadena alimenticia.',
+      fb_err: '❌ Incorrecto. La respuesta es B. La fotosíntesis captura CO₂ y con luz solar produce glucosa y oxígeno.',
+    },
+    {
+      q: 'Al analizar críticamente una obra de ciencia ficción distópica, ¿qué elemento literario suele representar la crítica social más profunda?',
+      opts: [
+        { text: 'La descripción detallada de la tecnología futurista', ok: false },
+        { text: 'Los personajes secundarios con nombres simbólicos', ok: false },
+        { text: 'El sistema de control y vigilancia sobre los ciudadanos', ok: true },
+        { text: 'El estilo poético del narrador', ok: false },
+      ],
+      fb_ok: '✅ ¡Perfecto! El aparato de control y vigilancia en las distopías es el espejo literario que señala peligros reales en las sociedades actuales.',
+      fb_err: '❌ Incorrecto. Es C. El sistema de control y vigilancia es el núcleo crítico de las distopías, desde 1984 hasta El cuento de la criada.',
+    },
+  ];
+
+  let qIdx    = 0;
+  let totalXP = 0;
+  let answered = false;
+
+  function renderQuestion() {
+    const q    = quizData[qIdx];
+    answered   = false;
+    const letters = ['A','B','C','D'];
+
+    document.getElementById('quizLabel').textContent    = `Pregunta ${qIdx+1} de ${quizData.length}`;
+    document.getElementById('quizQuestion').textContent = q.q;
+    document.getElementById('quizFeedback').className   = 'quiz-feedback';
+    document.getElementById('quizFeedback').textContent = '';
+    document.getElementById('quizNext').className       = 'quiz-next';
+
+    const pct = ((qIdx) / quizData.length) * 100 + 33;
+    document.getElementById('quizProgress').style.width = pct + '%';
+
+    const container = document.getElementById('quizOptions');
+    container.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.innerHTML = `<div class="opt-circle">${letters[i]}</div>${opt.text}`;
+      btn.onclick = () => answer(btn, opt.ok);
+      container.appendChild(btn);
+    });
+  }
+
+  function answer(btn, isCorrect) {
+    if (answered) return;
+    answered = true;
+
+    const allOpts = document.querySelectorAll('.quiz-opt');
+    allOpts.forEach(b => { b.onclick = null; b.style.opacity = '0.5'; });
+    btn.style.opacity = '1';
+
+    const fb = document.getElementById('quizFeedback');
+    const q  = quizData[qIdx];
+
+    if (isCorrect) {
+      btn.classList.add('correct');
+      totalXP += 25;
+      fb.textContent = q.fb_ok;
+      fb.className   = 'quiz-feedback show ok';
+    } else {
+      btn.classList.add('wrong');
+      fb.textContent = q.fb_err;
+      fb.className   = 'quiz-feedback show err';
+    }
+    document.getElementById('quizXp').textContent = `+${totalXP} XP`;
+    document.getElementById('quizNext').className = 'quiz-next show';
+  }
+
+  function nextQuestion() {
+    qIdx++;
+    if (qIdx < quizData.length) {
+      renderQuestion();
+    } else {
+      // Finished
+      document.getElementById('quizQuestion').textContent = `🎉 ¡Quiz completado! Ganaste ${totalXP} XP en esta sesión.`;
+      document.getElementById('quizOptions').innerHTML    = '';
+      document.getElementById('quizFeedback').className  = 'quiz-feedback';
+      document.getElementById('quizNext').className      = 'quiz-next';
+      document.getElementById('quizProgress').style.width = '100%';
+      document.getElementById('quizLabel').textContent   = `¡Finalizado! ${totalXP}/75 XP`;
+
+      // ── Guardar en Firestore si hay sesión activa ──
+      const user = firebase.auth().currentUser;
+      if (user) {
+        const aciertos = Math.round(totalXP / 25);
+        guardarProgreso(user.uid, totalXP, aciertos, quizData.length);
+      } else {
+        showToast('💡 Crea una cuenta para guardar tu progreso', 'ok');
+      }
+
+      const restart = document.createElement('button');
+      restart.className   = 'quiz-next show';
+      restart.textContent = '↺ Reiniciar quiz';
+      restart.onclick     = () => { qIdx = 0; totalXP = 0; document.getElementById('quizXp').textContent = '+0 XP'; renderQuestion(); restart.remove(); };
+      document.getElementById('quizWidget').appendChild(restart);
+    }
+  }
+
+  renderQuestion();
+
+  // ── NAV ACTIVE SCROLL ────────────────────────────────────
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) cur = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + cur ? 'var(--text)' : '';
+    });
+  });
+</script>
+</body>
+</html>
