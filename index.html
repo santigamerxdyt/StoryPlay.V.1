@@ -14,7 +14,8 @@ import { getAnalytics } from "firebase/analytics";
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>const app = initializeApp(firebaseConfig);
+<script>
+  const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);</script>
 <style>
   :root {
@@ -1122,6 +1123,29 @@ import { getAnalytics } from "firebase/analytics";
 </style>
 </head>
 <body>
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAhgbEsfBXR6Ox7qogSxmfHCetrI1jMwfY",
+    authDomain: "storyplay-lectura.firebaseapp.com",
+    projectId: "storyplay-lectura",
+    storageBucket: "storyplay-lectura.firebasestorage.app",
+    messagingSenderId: "891488967017",
+    appId: "1:891488967017:web:60cc0c5fe1e575854b85f8",
+    measurementId: "G-N4HNYGCMPJ"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 
 <!-- CURSOR -->
 <div class="cursor" id="cursor"></div>
@@ -1507,7 +1531,7 @@ import { getAnalytics } from "firebase/analytics";
     </div>
     <div class="plan-card featured reveal">
       <div class="plan-name">Premium Individual</div>
-      <div class="plan-price"><span class="plan-currency">$</span>9<span style="font-size:1rem;color:var(--text-dim)">.99</span></div>
+      <div class="plan-price"><span class="plan-currency">$</span>7<span style="font-size:1rem;color:var(--text-dim)">.99</span></div>
       <div class="plan-period">/ mes · cancela cuando quieras</div>
       <ul class="plan-features">
         <li><span class="check">✓</span> Acceso total a biblioteca</li>
@@ -1521,7 +1545,7 @@ import { getAnalytics } from "firebase/analytics";
     </div>
     <div class="plan-card reveal">
       <div class="plan-name">Premium Familiar</div>
-      <div class="plan-price"><span class="plan-currency">$</span>17<span style="font-size:1rem;color:var(--text-dim)">.99</span></div>
+      <div class="plan-price"><span class="plan-currency">$</span>12<span style="font-size:1rem;color:var(--text-dim)">.99</span></div>
       <div class="plan-period">/ mes · hasta 5 perfiles</div>
       <ul class="plan-features">
         <li><span class="check">✓</span> Todo lo de Premium</li>
@@ -1978,7 +2002,7 @@ import { getAnalytics } from "firebase/analytics";
     <a href="#">Instituciones</a>
     <a href="#">Blog</a>
   </div>
-  <div class="footer-copy">© 2025 StoryPlay. Todos los derechos reservados.</div>
+  <div class="footer-copy">© 2026 StoryPlay. Todos los derechos reservados.</div>
 </footer>
 
 <script>
