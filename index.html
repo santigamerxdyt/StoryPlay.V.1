@@ -1847,11 +1847,10 @@
 
 <script>
   // ══════════════════════════════════════════════
-  //  ⚙️  CONFIGURACIÓN FIREBASE
-  //  👇  Reemplaza estos valores con los tuyos de:
-  //      https://console.firebase.google.com
+  //  ⚙️  CONFIGURACIÓN FIREBASE (compat)
+  //  Usamos un nombre distinto para evitar redeclaración
   // ══════════════════════════════════════════════
-  const firebaseConfig = {
+  const fbConfig = {
     apiKey: "AIzaSyAhgbEsfBXR6Ox7qogSxmfHCetrI1jMwfY",
     authDomain: "storyplay-lectura.firebaseapp.com",
     projectId: "storyplay-lectura",
@@ -1861,7 +1860,7 @@
     measurementId: "G-N4HNYGCMPJ"
   };
 
-  firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(fbConfig);
   const auth = firebase.auth();
   const db   = firebase.firestore();
 
